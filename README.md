@@ -118,6 +118,11 @@ Git, but running the test suite also needs `pyyaml` (frontmatter validation) on 
 Node.js and network access and touch `$HOME`, so they only run inside the pinned container — with
 no host setup beyond Docker or Podman.
 
+## Author
+
+Written by [Stefano Falasca](https://falasca.engineering), an embedded software consultant
+focused on safety-critical systems and agent-ready verification.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
