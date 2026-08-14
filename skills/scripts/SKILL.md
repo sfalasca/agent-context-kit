@@ -152,3 +152,21 @@ Scan the project for automation opportunities and propose new scripts.
    - Two or three bullet points describing what it would do
 4. Present all proposals as a numbered list. Ask the user which ones to create.
 5. For each approved proposal, run `add <path> "<intent>"` inline — do not ask for confirmation again.
+
+---
+
+## AGENTS.md instruction
+
+The root `AGENTS.md` should contain this block (add it under a `## Scripts` heading if missing).
+Use `AGENTS.md`, not `CLAUDE.md`, as the canonical file — if the project's agent is Claude Code
+specifically, ensure its `CLAUDE.md` contains a single-line import instead of a duplicated copy:
+`@AGENTS.md` (Claude Code resolves that as an include). Other agents that support the emerging
+`AGENTS.md` cross-tool convention read it directly, no import needed.
+
+```
+## Scripts
+
+Before writing a new script or tool, or doing something manually that could be scripted, run
+`/scripts context "<task description>"` to check whether one already exists. Prefer running an
+existing script over reimplementing the same logic inline.
+```

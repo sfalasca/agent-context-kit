@@ -111,9 +111,9 @@ directive doc.
 This repo's own conventions (OS independence, Agent Skills spec compliance, install design) live
 in [`docs/`](docs/) — read them before changing anything under `skills/`. Operational procedures
 for working on this repo itself (running the test suite, installing these skills for local
-testing) live in [`how-tos/`](how-tos/) — this repo dogfoods its own `directives`/`how-tos`
-skills on itself; its `AGENTS.md` carries both skills' instruction blocks, and its `CLAUDE.md`
-just imports it (`@AGENTS.md`). Tests for every script
+testing) live in [`how-tos/`](how-tos/) — this repo dogfoods its own `directives`/`how-tos`/
+`scripts` skills on itself; its `AGENTS.md` carries all three skills' instruction blocks, and its
+`CLAUDE.md` just imports it (`@AGENTS.md`). Tests for every script
 in this repo live in [`tests/`](tests/); the shipped skills themselves need only Python 3.9+ and
 Git, but running the test suite also needs `pyyaml` (frontmatter validation) on the host, or
 `python3 scripts/dev test` to run the full suite — including the `npx skills add` tests that need
