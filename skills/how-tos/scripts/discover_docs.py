@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Discover all how-to docs and AGENTS.md in the current project.
 Unlike the `directives` skill, this skill ships no bundled defaults -- how-tos
-(deploy, generate a token, compile, cut a video, evaluate an agent, ...) are
+(deploy, generate a token, compile, rotate credentials, run a database migration, ...) are
 inherently project-specific, so there is nothing generic to fall back to.
 Outputs a plain structured list -- no file content.
 """

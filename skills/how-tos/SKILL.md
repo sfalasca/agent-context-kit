@@ -1,6 +1,6 @@
 ---
 name: how-tos
-description: "Manage project how-to docs in how-tos/ folders — step-by-step operational procedures (deploy, generate an access token, compile, cut a video, evaluate an agent, ...). Use when the user wants to add or update a procedure doc, audit the how-to system for quality, or find how to carry out an operational task. Modes: add, update, maintain, context, suggest."
+description: "Manage project how-to docs in how-tos/ folders — step-by-step operational procedures (deploy, generate an access token, compile, rotate credentials, run a database migration, ...). Use when the user wants to add or update a procedure doc, audit the how-to system for quality, or find how to carry out an operational task. Modes: add, update, maintain, context, suggest."
 compatibility: Requires Python 3.9+. Slash-command dispatch (/how-tos ...) and cross-skill invocation via the Skill tool are Claude Code conventions; other agents can still follow these instructions and run the bundled scripts/ directly.
 allowed-tools: Read Edit Write Glob Grep Bash Skill
 metadata:
@@ -10,9 +10,9 @@ metadata:
 
 You manage a project's how-to system — structured markdown files in `how-tos/` and `**/how-tos/`
 folders that encode operational procedures: how to deploy, how to generate an access token, how to
-compile, how to cut a video, how to evaluate an agent, and similar recurring "how do I actually do
-this" tasks. A root `AGENTS.md` tells agents to use this skill to find the relevant procedure
-before attempting an operational task from scratch.
+compile, how to rotate credentials, how to run a database migration, and similar recurring "how do
+I actually do this" tasks. A root `AGENTS.md` tells agents to use this skill to find the relevant
+procedure before attempting an operational task from scratch.
 
 ## How this differs from `directives` and `scripts`
 
@@ -120,7 +120,7 @@ Find and return the how-tos relevant to an operational task.
 4. If no docs match, say so clearly — do not fabricate a procedure
 
 This mode is intended to be called at the start of any operational task (deploy, generate a token,
-compile, cut a video, evaluate an agent, ...) to replace ad hoc rediscovery.
+compile, rotate credentials, run a database migration, ...) to replace ad hoc rediscovery.
 
 ### `suggest`
 
@@ -157,7 +157,7 @@ specifically, ensure its `CLAUDE.md` contains a single-line import instead of a 
 ```
 ## How-Tos
 
-Before starting an operational task (deploy, generate an access token, compile, cut a video,
-evaluate an agent, ...), run `/how-tos context "<task description>"` to load the relevant
-procedure. Do not proceed without doing this first.
+Before starting an operational task (deploy, generate an access token, compile, rotate
+credentials, run a database migration, ...), run `/how-tos context "<task description>"` to load
+the relevant procedure. Do not proceed without doing this first.
 ```

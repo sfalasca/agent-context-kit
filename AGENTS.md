@@ -6,9 +6,9 @@ conventions for that task. Do not proceed without doing this first.
 
 ## How-Tos
 
-Before starting an operational task (deploy, generate an access token, compile, cut a video,
-evaluate an agent, ...), run `/how-tos context "<task description>"` to load the relevant
-procedure. Do not proceed without doing this first.
+Before starting an operational task (deploy, generate an access token, compile, rotate
+credentials, run a database migration, ...), run `/how-tos context "<task description>"` to load
+the relevant procedure. Do not proceed without doing this first.
 
 ## Scripts
 
