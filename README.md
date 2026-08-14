@@ -1,5 +1,7 @@
 # agent-context-kit
 
+[Project page](https://falasca.engineering/agent-context-kit/)
+
 Three [Agent Skills](https://agentskills.io/specification) that give a coding agent persistent,
 discoverable context about a codebase, instead of re-deriving it every session. `SKILL.md` is an
 open format — these work with any agent that supports it (Claude Code, Codex, Cursor, OpenCode,
