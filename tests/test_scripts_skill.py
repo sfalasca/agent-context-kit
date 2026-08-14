@@ -79,12 +79,23 @@ class DescribeScriptsTest(TmpProjectTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("not executable", result.stdout)
 
-    def test_readme_content_surfaced_verbatim(self):
+    def test_readme_short_content_surfaced(self):
         (self.scripts_dir / "README.md").write_text("gotcha: needs FOO env var\n")
         result = run(["python3", DESCRIBE], cwd=self.project)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("gotcha: needs FOO env var", result.stdout)
-        self.assertIn("authoritative for gotchas", result.stdout)
+        self.assertIn("summary only, not the full README", result.stdout)
+
+    def test_readme_long_content_not_dumped_in_full(self):
+        # describe is the cheap metadata pass -- full README content is deferred to context
+        # mode's match step, mirroring describe_docs.py's frontmatter-only extraction.
+        (self.scripts_dir / "README.md").write_text(
+            "intro paragraph\n\n" + "\n".join(f"detail line {i}" for i in range(50))
+        )
+        result = run(["python3", DESCRIBE], cwd=self.project)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("intro paragraph", result.stdout)
+        self.assertNotIn("detail line 49", result.stdout)
 
 
 if __name__ == "__main__":

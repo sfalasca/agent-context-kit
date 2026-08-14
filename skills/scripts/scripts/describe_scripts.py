@@ -3,6 +3,9 @@
 print its output. This is the authoritative metadata source (not a comment header) -- every
 script is required to implement --help properly: fast, side-effect-free, exit 0. A timeout
 guards against a script that doesn't honor that.
+For a scripts folder's README.md, prints only a short summary (first paragraph, capped) --
+not the full body, to keep this cheap like describe_docs.py's frontmatter-only extraction.
+Full README content is read later, only for folders whose scripts actually match a task.
 Also prints an optional "# tags:" header line if present, to help cheap keyword pre-filtering.
 """
 
@@ -40,16 +43,45 @@ def read_tags_line(path: Path) -> str:
     return ""
 
 
+README_SUMMARY_LINES = 8
+
+
+def read_readme_summary(path: Path) -> list:
+    """First paragraph of a README, capped at README_SUMMARY_LINES -- a cheap discovery
+    signal, not the authoritative content. Mirrors describe_docs.py extracting frontmatter
+    only, not the body: full README content is read later, only for folders that actually
+    match (see this skill's `context` mode).
+    """
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError as exc:
+        return [f"(could not read: {exc})"]
+    i = 0
+    while i < len(lines) and not lines[i].strip():
+        i += 1
+    summary = []
+    for line in lines[i:]:
+        if not line.strip() and summary:
+            break
+        summary.append(line)
+        if len(summary) >= README_SUMMARY_LINES:
+            break
+    return summary
+
+
 def describe_one(f: Path) -> None:
     print(f)
 
     if f.name == "README.md":
-        print("  (folder README -- authoritative for gotchas/prerequisites/conventions --help won't cover)")
-        try:
-            for line in f.read_text(encoding="utf-8", errors="replace").splitlines():
+        summary = read_readme_summary(f)
+        if summary:
+            for line in summary:
                 print(f"  {line}")
-        except OSError as exc:
-            print(f"  (could not read: {exc})")
+        print(
+            "  (summary only, not the full README -- read this file directly once its "
+            "folder's scripts match; it's often the only place gotchas, prerequisites, or "
+            "non-obvious conventions live)"
+        )
         print()
         return
 

@@ -72,22 +72,26 @@ A `scripts/` folder may also carry a `README.md` — e.g. `scripts/android-emula
 That's not a script, so it has no `--help`, but it's often the *only* place gotchas,
 prerequisites, or non-obvious conventions live (permission requirements, environment caveats,
 recommended configs) — things no individual script's `--help` output would mention on its own.
-Treat it as authoritative context for every script in that same folder, not just noise to skip.
+Treat it as authoritative context for every script in that same folder, not just noise to skip —
+but its full content is only read once that folder's scripts are relevant (step 4 below), the
+same way a directive doc's body is only read once it matches in the `directives` skill; the
+describe step below only ever sees a short summary of it, not the whole file.
 
 1. Run `discover_scripts.py` — list of paths
 2. Run `describe_scripts.py` — runs `--help` on every script (with a timeout) and prints its
-   output, plus any optional `# tags:` line; for a `README.md` in a scripts folder, prints its
-   full content instead of attempting `--help` on it
+   output, plus any optional `# tags:` line; for a `README.md` in a scripts folder, prints only a
+   short summary (first paragraph, capped) instead of the full file
 
 ```bash
 python3 scripts/describe_scripts.py
 ```
 
-3. Match the `--help` output, any `tags` line, any sibling `README.md` content, and the path
-   against the task description — be inclusive, err on the side of returning more
+3. Match the `--help` output, any `tags` line, any `README.md` summary, and the path against the
+   task description — be inclusive, err on the side of returning more
 4. Return each matched script with its `--help` output already captured in step 2 — no need to
-   run it again. If its folder has a `README.md`, surface the relevant parts of that too (don't
-   just link to it) — that's frequently where the actual answer to a "how do I..." question is.
+   run it again. If its folder has a `README.md`, read the **full file** now and surface the
+   relevant parts (don't just link to it, and don't rely on the step-2 summary) — that's
+   frequently where the actual answer to a "how do I..." question is.
 5. If no scripts match, say so clearly — do not fabricate scripts
 
 ### `run <script> [args]`
