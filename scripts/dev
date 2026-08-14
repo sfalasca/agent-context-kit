@@ -2,8 +2,7 @@
 # tags: [container, test, dev, docker, podman]
 """Runtime-detecting wrapper around docker/podman compose for this repo's own dev/test
 container (see Containerfile, compose.yaml). Picks whichever runtime is installed so nobody
-has to hardcode one -- see docs/os-independence.md and the bundled
-container-only-development directive this repo ships to consumers.
+has to hardcode one -- see docs/os-independence.md.
 """
 
 import argparse

@@ -1,7 +1,7 @@
 ---
 name: how-tos
 description: "Manage project how-to docs in how-tos/ folders — step-by-step operational procedures (deploy, generate an access token, compile, cut a video, evaluate an agent, ...). Use when the user wants to add or update a procedure doc, audit the how-to system for quality, or find how to carry out an operational task. Modes: add, update, maintain, context, suggest."
-compatibility: Requires Python 3.9+ and git. Slash-command dispatch (/how-tos ...) and cross-skill invocation via the Skill tool are Claude Code conventions; other agents can still follow these instructions and run the bundled scripts/ directly.
+compatibility: Requires Python 3.9+. Slash-command dispatch (/how-tos ...) and cross-skill invocation via the Skill tool are Claude Code conventions; other agents can still follow these instructions and run the bundled scripts/ directly.
 allowed-tools: Read Edit Write Glob Grep Bash Skill
 metadata:
   claude-code-argument-hint: <add|update|maintain|context|suggest> [path] ["intent or task description"]
@@ -29,25 +29,12 @@ frontmatter-only describe pass) applied to `how-tos/` instead of `docs/`. Unlike
 ships **no bundled defaults** — operational procedures are inherently project-specific, so there is
 nothing generic to fall back to.
 
-All scripts this skill uses (`scripts/check_worktree.py`, `scripts/discover_docs.py`,
-`scripts/describe_docs.py`) are plain Python 3 (no bash/WSL required — this works the same on
-Linux, macOS, and Windows) and live in this skill's own `scripts/` directory, next to this
-`SKILL.md` file. Run them with `python3 <path>`, resolving `<path>` against that directory (e.g.
-if this file is at `/home/alice/.claude/skills/how-tos/SKILL.md`, run
-`python3 /home/alice/.claude/skills/how-tos/scripts/check_worktree.py`).
-
-## Preflight: worktree isolation
-
-Any mode that writes to how-to docs (`add`, `update`, `maintain`'s inline fixes) must not run
-directly against the primary checkout. Run this before making any such edit:
-
-```bash
-python3 scripts/check_worktree.py
-```
-
-If it exits non-zero, stop — do not edit any file. Create or switch to an isolated worktree first
-(per the project's git-worktree-oneflow convention), then retry the mode from there. Read-only
-modes (`context`, `suggest`'s proposal step) don't need this check.
+All scripts this skill uses (`scripts/discover_docs.py`, `scripts/describe_docs.py`) are plain
+Python 3 (no bash/WSL required — this works the same on Linux, macOS, and Windows) and live in
+this skill's own `scripts/` directory, next to this `SKILL.md` file. Run them with
+`python3 <path>`, resolving `<path>` against that directory (e.g. if this file is at
+`/home/alice/.claude/skills/how-tos/SKILL.md`, run
+`python3 /home/alice/.claude/skills/how-tos/scripts/discover_docs.py`).
 
 ## How-to doc frontmatter
 
@@ -87,29 +74,26 @@ python3 scripts/discover_docs.py
 
 ### `add <path> "<intent>"`
 
-1. Run `check_worktree.py` (preflight — stop if it fails)
-2. Run `discover_docs.py`
-3. Read existing how-tos in the same folder for tone/format reference
-4. For each step, check whether the scripts skill's discovery mechanism already covers it — defer
+1. Run `discover_docs.py`
+2. Read existing how-tos in the same folder for tone/format reference
+3. For each step, check whether the scripts skill's discovery mechanism already covers it — defer
    to an existing script per the section above instead of inlining commands
-5. Create the new how-to doc at `<path>` with correct frontmatter and numbered, imperative steps
+4. Create the new how-to doc at `<path>` with correct frontmatter and numbered, imperative steps
    - Content is procedural: concrete, ordered, verifiable steps — not background or rationale
    - Concise — Claude reads this on every relevant operational task
-6. Ensure root `AGENTS.md` contains the how-tos instruction (see below); add it if missing
+5. Ensure root `AGENTS.md` contains the how-tos instruction (see below); add it if missing
 
 ### `update <path> "<intent>"`
 
-1. Run `check_worktree.py` (preflight — stop if it fails)
-2. Run `discover_docs.py`
-3. Read the current doc
-4. Update steps and amend frontmatter as needed (preserve existing fields, update if stale)
-5. Re-check any newly-manual steps against the scripts skill's discovery mechanism per the
+1. Run `discover_docs.py`
+2. Read the current doc
+3. Update steps and amend frontmatter as needed (preserve existing fields, update if stale)
+4. Re-check any newly-manual steps against the scripts skill's discovery mechanism per the
    deferring section above
 
 ### `maintain`
 
-A quality audit of the entire how-to system. Run `check_worktree.py` (preflight — stop if it
-fails, since this mode fixes things inline), then:
+A quality audit of the entire how-to system. Run:
 
 ```bash
 python3 scripts/describe_docs.py

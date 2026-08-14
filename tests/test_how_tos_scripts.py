@@ -2,11 +2,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from util import REPO_ROOT, init_git_repo, run
+from util import REPO_ROOT, run
 
 DISCOVER = REPO_ROOT / "skills" / "how-tos" / "scripts" / "discover_docs.py"
 DESCRIBE = REPO_ROOT / "skills" / "how-tos" / "scripts" / "describe_docs.py"
-CHECK_WORKTREE = REPO_ROOT / "skills" / "how-tos" / "scripts" / "check_worktree.py"
 
 
 class TmpProjectTestCase(unittest.TestCase):
@@ -54,31 +53,6 @@ class DescribeDocsTest(TmpProjectTestCase):
         result = run(["python3", DESCRIBE], cwd=self.project)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("(no how-to docs found)", result.stdout)
-
-
-class CheckWorktreeTest(TmpProjectTestCase):
-    def test_passes_silently_outside_git(self):
-        result = run(["python3", CHECK_WORKTREE], cwd=self.project)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout, "")
-
-    def test_refuses_primary_checkout(self):
-        init_git_repo(self.project)
-        result = run(["python3", CHECK_WORKTREE], cwd=self.project)
-        self.assertEqual(result.returncode, 1)
-        self.assertIn("refusing to mutate how-to docs in the primary checkout", result.stderr)
-
-    def test_passes_in_isolated_worktree(self):
-        init_git_repo(self.project)
-        with tempfile.TemporaryDirectory() as wt_parent:
-            wt_path = Path(wt_parent) / "wt"
-            add = run(
-                ["git", "worktree", "add", "-q", str(wt_path), "-b", "feature"],
-                cwd=self.project,
-            )
-            self.assertEqual(add.returncode, 0, add.stderr)
-            result = run(["python3", CHECK_WORKTREE], cwd=wt_path)
-            self.assertEqual(result.returncode, 0, result.stderr)
 
 
 if __name__ == "__main__":

@@ -23,8 +23,8 @@ covers: [verification, testing, linting, static-analysis, ci, fail-fast, review,
 - This ordering exists to get the fastest possible signal on failure — do not run an expensive step
   before a cheap one that would have caught the same class of problem sooner.
 - "Working" is never declared from code reading or reasoning alone. A change is only reported as
-  done/working after the relevant levels of this hierarchy have actually been run and passed, inside
-  a container per [[container-only-development]], using real tools per [[tools-over-judgment]].
+  done/working after the relevant levels of this hierarchy have actually been run and passed, using
+  real tools per [[tools-over-judgment]] rather than reasoning alone.
 - If a project doesn't yet have one of these levels wired up (e.g. no static analysis configured),
   that's a gap to flag or fill (see [[tools-over-judgment]] on writing project-specific tools) — not
   a reason to skip straight to LLM-based review as if it were sufficient.

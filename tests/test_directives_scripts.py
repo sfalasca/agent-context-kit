@@ -2,11 +2,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from util import REPO_ROOT, init_git_repo, run
+from util import REPO_ROOT, run
 
 DISCOVER = REPO_ROOT / "skills" / "directives" / "scripts" / "discover_docs.py"
 DESCRIBE = REPO_ROOT / "skills" / "directives" / "scripts" / "describe_docs.py"
-CHECK_WORKTREE = REPO_ROOT / "skills" / "directives" / "scripts" / "check_worktree.py"
 
 
 class TmpProjectTestCase(unittest.TestCase):
@@ -29,7 +28,7 @@ class DiscoverDocsTest(TmpProjectTestCase):
         result = run(["python3", DISCOVER], cwd=self.project)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("=== AGENTS.md ===\nAGENTS.md", result.stdout)
-        self.assertIn("container-only-development.md", result.stdout)
+        self.assertIn("hierarchical-verification.md", result.stdout)
         self.assertIn("docs/example.md", result.stdout)
 
     def test_no_docs_reports_none_found(self):
@@ -42,7 +41,7 @@ class DiscoverDocsTest(TmpProjectTestCase):
         result = run(["python3", DISCOVER], cwd=self.project)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("skipped: .no-bundled-directives marker present", result.stdout)
-        self.assertNotIn("container-only-development.md", result.stdout)
+        self.assertNotIn("hierarchical-verification.md", result.stdout)
 
 
 class DescribeDocsTest(TmpProjectTestCase):
@@ -69,34 +68,7 @@ class DescribeDocsTest(TmpProjectTestCase):
         result = run(["python3", DESCRIBE], cwd=self.project)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("skipped: .no-bundled-directives marker present", result.stdout)
-        self.assertNotIn("container-only-development", result.stdout)
-
-
-class CheckWorktreeTest(TmpProjectTestCase):
-    def test_passes_silently_outside_git(self):
-        result = run(["python3", CHECK_WORKTREE], cwd=self.project)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout, "")
-        self.assertEqual(result.stderr, "")
-
-    def test_refuses_primary_checkout(self):
-        init_git_repo(self.project)
-        result = run(["python3", CHECK_WORKTREE], cwd=self.project)
-        self.assertEqual(result.returncode, 1)
-        self.assertIn("refusing to mutate directive docs in the primary checkout", result.stderr)
-
-    def test_passes_in_isolated_worktree(self):
-        init_git_repo(self.project)
-        with tempfile.TemporaryDirectory() as wt_parent:
-            wt_path = Path(wt_parent) / "wt"
-            add = run(
-                ["git", "worktree", "add", "-q", str(wt_path), "-b", "feature"],
-                cwd=self.project,
-            )
-            self.assertEqual(add.returncode, 0, add.stderr)
-            result = run(["python3", CHECK_WORKTREE], cwd=wt_path)
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertEqual(result.stdout, "")
+        self.assertNotIn("hierarchical-verification", result.stdout)
 
 
 if __name__ == "__main__":

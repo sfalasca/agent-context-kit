@@ -4,8 +4,7 @@ services:
       context: .
       dockerfile: Containerfile
       target: checks
-    # Read-only mount: a checks run can never mutate source, per docs' own bundled
-    # container-only-development directive (skills/directives/docs/container-only-development.md).
+    # Read-only mount: a checks run can never mutate source.
     volumes:
       - .:/workspace:ro
     working_dir: /workspace

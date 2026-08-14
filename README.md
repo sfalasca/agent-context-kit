@@ -95,23 +95,14 @@ your agent's own docs for the exact invocation syntax.
 ## Bundled default directives
 
 The `directives` skill ships a small set of general-purpose engineering directives in
-[`skills/directives/docs/`](skills/directives/docs/) — container-only development, out-of-tree
-artifacts, git worktree + OneFlow branching, hierarchical verification, task management,
-defensive-programming assertions, and a few more. These apply to any project the skill is
+[`skills/directives/docs/`](skills/directives/docs/) — hierarchical, fail-fast verification;
+out-of-tree build artifacts; and preferring real tools over LLM judgment. These apply to any
+project the skill is
 installed into, with no per-project setup; a project's own `docs/` takes precedence over a bundled
 default on the same topic, and a project can opt out of the bundle entirely (see
 [`docs/install-conventions.md`](docs/install-conventions.md)). Treat them as a starting point, not
 a fixed list — the `directives` skill's own `maintain` mode audits and edits them like any other
 directive doc.
-
-## Worktree isolation
-
-`directives` and `how-tos` both refuse to write (`add`/`update`/`maintain`'s inline fixes) from a
-project's primary git checkout — each ships a `check_worktree.py` preflight that a skill
-invocation runs first, and stops if it's not in an isolated worktree. This exists because a
-concurrent agent session mutating docs directly in a shared checkout is exactly the kind of
-silent-clobber failure these skills are meant to prevent, not cause. Read-only modes (`context`,
-`suggest`'s proposal step) are exempt.
 
 ## Development
 

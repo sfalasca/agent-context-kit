@@ -47,8 +47,7 @@ apt-packaged Node (too old for the `skills` CLI's `>=22.20` requirement) — and
 test run can never mutate source.
 
 Requires Docker (with the `compose` plugin) or Podman (with `podman-compose` or the `compose`
-plugin) — `scripts/dev` detects whichever is installed, per this repo's own bundled
-`container-only-development` directive.
+plugin) — `scripts/dev` detects whichever is installed.
 
 ## 3. Confirm before declaring a change "working"
 

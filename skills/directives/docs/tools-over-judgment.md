@@ -14,8 +14,7 @@ covers: [tooling, linting, static-analysis, sanitizers, scripts, verification]
   existing script over reimplementing the same logic inline.
 - This applies recursively: if the same kind of manual check would plausibly be needed again and
   `/scripts context` found nothing, use `/scripts add <path> "<intent>"` to scaffold it properly (in
-  a `scripts/`/`tools/` directory, run via the project's container runtime per
-  [[container-only-development]]) rather than writing it ad hoc or repeating the manual process by
+  a `scripts/`/`tools/` directory) rather than writing it ad hoc or repeating the manual process by
   hand each time.
 - Any script written this way must implement `--help` properly (fast, side-effect-free, exits `0`,
   real description/usage) — this is what makes it discoverable by `/scripts context` later, not

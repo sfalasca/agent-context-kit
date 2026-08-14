@@ -10,32 +10,19 @@ metadata:
 
 You manage a project's directive system — structured markdown files in `docs/` and `**/docs/` folders that encode conventions, standards, and domain knowledge. A single root `AGENTS.md` tells agents to use this skill to find relevant directives before doing any work.
 
-All scripts this skill uses (`scripts/check_worktree.py`, `scripts/discover_docs.py`,
-`scripts/describe_docs.py`) are plain Python 3 (no bash/WSL required — this works the same on
-Linux, macOS, and Windows) and live in this skill's own `scripts/` directory, next to this
-`SKILL.md` file. Run them with `python3 <path>`, resolving `<path>` against that directory (e.g.
-if this file is at `/home/alice/.claude/skills/directives/SKILL.md`, run
-`python3 /home/alice/.claude/skills/directives/scripts/check_worktree.py`).
-
-## Preflight: worktree isolation
-
-Any mode that writes to directive docs (`add`, `update`, `maintain`'s inline fixes) must not run
-directly against the primary checkout. Run this before making any such edit:
-
-```bash
-python3 scripts/check_worktree.py
-```
-
-If it exits non-zero, stop — do not edit any file. Create or switch to an isolated worktree first
-(per the project's git-worktree-oneflow convention), then retry the mode from there. Read-only
-modes (`context`, `suggest`'s proposal step) don't need this check.
+All scripts this skill uses (`scripts/discover_docs.py`, `scripts/describe_docs.py`) are plain
+Python 3 (no bash/WSL required — this works the same on Linux, macOS, and Windows) and live in
+this skill's own `scripts/` directory, next to this `SKILL.md` file. Run them with
+`python3 <path>`, resolving `<path>` against that directory (e.g. if this file is at
+`/home/alice/.claude/skills/directives/SKILL.md`, run
+`python3 /home/alice/.claude/skills/directives/scripts/discover_docs.py`).
 
 ## Skill-bundled default docs
 
 This skill ships with its own `docs/` folder (next to this file) containing a default set of
-directive docs — general engineering conventions (container-only development, out-of-tree
-artifacts, git worktrees + OneFlow, tools-over-judgment, hierarchical verification, task
-management) that apply to any project, not just one that happens to vendor its own copies.
+directive docs — general engineering conventions (hierarchical verification, out-of-tree
+artifacts, tools-over-judgment) that apply to any project, not just one that happens to vendor
+its own copies.
 
 `discover_docs.py`/`describe_docs.py` always include these bundled docs *in addition to* whatever
 a project has in its own `docs/` folders — there is nothing to set up per project to benefit from
@@ -79,27 +66,24 @@ python3 scripts/discover_docs.py
 
 ### `add <path> "<intent>"`
 
-1. Run `check_worktree.py` (preflight — stop if it fails)
-2. Run `discover_docs.py`
-3. Read existing docs in the same folder for tone/format reference
-4. Create the new directive doc at `<path>` with correct frontmatter and well-structured content
+1. Run `discover_docs.py`
+2. Read existing docs in the same folder for tone/format reference
+3. Create the new directive doc at `<path>` with correct frontmatter and well-structured content
    - Content should be directive in tone: rules, not descriptions
    - Concise — Claude reads this on every relevant task
-5. Ensure root `AGENTS.md` contains the directives instruction (see below); add it if missing
-6. Assess impact and apply codebase changes (see Impact Assessment)
+4. Ensure root `AGENTS.md` contains the directives instruction (see below); add it if missing
+5. Assess impact and apply codebase changes (see Impact Assessment)
 
 ### `update <path> "<intent>"`
 
-1. Run `check_worktree.py` (preflight — stop if it fails)
-2. Run `discover_docs.py`
-3. Read the current doc
-4. Update content and amend frontmatter as needed (preserve existing fields, update if stale)
-5. Assess impact and apply codebase changes
+1. Run `discover_docs.py`
+2. Read the current doc
+3. Update content and amend frontmatter as needed (preserve existing fields, update if stale)
+4. Assess impact and apply codebase changes
 
 ### `maintain`
 
-A quality audit of the entire directive system. Run `check_worktree.py` (preflight — stop if it
-fails, since this mode fixes things inline), then:
+A quality audit of the entire directive system. Run:
 
 ```bash
 python3 scripts/describe_docs.py

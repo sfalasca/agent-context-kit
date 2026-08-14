@@ -18,12 +18,3 @@ def run(args, cwd: Optional[Path] = None, timeout: float = 15, env: Optional[dic
         env=env,
     )
 
-
-def init_git_repo(path: Path) -> None:
-    """Initialize a git repo at path with one commit, quietly."""
-    run(["git", "init", "-q", "-b", "main"], cwd=path)
-    run(["git", "config", "user.email", "test@example.com"], cwd=path)
-    run(["git", "config", "user.name", "Test"], cwd=path)
-    (path / ".keep").write_text("")
-    run(["git", "add", "."], cwd=path)
-    run(["git", "commit", "-q", "-m", "initial"], cwd=path)

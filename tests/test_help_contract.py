@@ -25,7 +25,7 @@ class HelpContractTest(unittest.TestCase):
     def test_discovery_finds_scripts(self):
         # Guards against a discovery bug silently turning this into a no-op test.
         scripts = discover_python_scripts()
-        self.assertGreaterEqual(len(scripts), 8, scripts)
+        self.assertGreaterEqual(len(scripts), 6, scripts)
 
     def test_every_script_supports_help(self):
         failures = []

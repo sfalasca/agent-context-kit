@@ -10,11 +10,6 @@ FROM python:3.12.7-slim-bookworm AS tools
 # intact; this merges into (does not replace) the existing /usr/local, so Python is untouched.
 COPY --from=node-tools /usr/local /usr/local
 
-# git: needed by check_worktree.py's own conventions and its tests.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends git \
-    && rm -rf /var/lib/apt/lists/*
-
 # PyYAML: used only by tests/test_skill_frontmatter.py to validate SKILL.md frontmatter
 # against real YAML parsing, per docs/skill-content-portability.md.
 RUN pip install --no-cache-dir --root-user-action=ignore pyyaml==6.0.2

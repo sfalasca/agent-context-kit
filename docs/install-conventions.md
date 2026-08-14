@@ -34,8 +34,8 @@ Code-native (`/plugin`) tooling, not custom code this repo has to keep working a
 
 ## Bundled opinionated directives must be optional
 
-The `directives` skill ships default directive docs (container-only development, git worktrees +
-OneFlow, hierarchical verification, etc. — see `skills/directives/docs/`) that apply automatically
+The `directives` skill ships default directive docs (hierarchical verification, out-of-tree
+artifacts, tools-over-judgment, etc. — see `skills/directives/docs/`) that apply automatically
 to every project the skill is installed into, with no per-project setup. That's the point of
 bundling them, but it also means a project that disagrees with one of these defaults needs a real
 way to say so — silently editing the bundled copy isn't an option (see the `directives` skill's
