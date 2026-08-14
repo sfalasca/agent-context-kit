@@ -1,15 +1,17 @@
 ---
 name: how-tos
-description: Manage project how-to docs in how-tos/ folders — step-by-step operational procedures (deploy, generate an access token, compile, cut a video, evaluate an agent, ...). Use when the user wants to add or update a procedure doc, audit the how-to system for quality, or find how to carry out an operational task. Modes: add, update, maintain, context, suggest.
-argument-hint: <add|update|maintain|context|suggest> [path] ["intent or task description"]
-context: fork
-allowed-tools: Read, Edit, Write, Glob, Grep, Bash, Skill
+description: "Manage project how-to docs in how-tos/ folders — step-by-step operational procedures (deploy, generate an access token, compile, cut a video, evaluate an agent, ...). Use when the user wants to add or update a procedure doc, audit the how-to system for quality, or find how to carry out an operational task. Modes: add, update, maintain, context, suggest."
+compatibility: Requires Python 3.9+ and git. Slash-command dispatch (/how-tos ...) and cross-skill invocation via the Skill tool are Claude Code conventions; other agents can still follow these instructions and run the bundled scripts/ directly.
+allowed-tools: Read Edit Write Glob Grep Bash Skill
+metadata:
+  claude-code-argument-hint: <add|update|maintain|context|suggest> [path] ["intent or task description"]
+  claude-code-context: fork
 ---
 
 You manage a project's how-to system — structured markdown files in `how-tos/` and `**/how-tos/`
 folders that encode operational procedures: how to deploy, how to generate an access token, how to
 compile, how to cut a video, how to evaluate an agent, and similar recurring "how do I actually do
-this" tasks. A root `CLAUDE.md` tells Claude to use this skill to find the relevant procedure
+this" tasks. A root `AGENTS.md` tells agents to use this skill to find the relevant procedure
 before attempting an operational task from scratch.
 
 ## How this differs from `directives` and `scripts`
@@ -27,13 +29,20 @@ frontmatter-only describe pass) applied to `how-tos/` instead of `docs/`. Unlike
 ships **no bundled defaults** — operational procedures are inherently project-specific, so there is
 nothing generic to fall back to.
 
+All scripts this skill uses (`scripts/check_worktree.py`, `scripts/discover_docs.py`,
+`scripts/describe_docs.py`) are plain Python 3 (no bash/WSL required — this works the same on
+Linux, macOS, and Windows) and live in this skill's own `scripts/` directory, next to this
+`SKILL.md` file. Run them with `python3 <path>`, resolving `<path>` against that directory (e.g.
+if this file is at `/home/alice/.claude/skills/how-tos/SKILL.md`, run
+`python3 /home/alice/.claude/skills/how-tos/scripts/check_worktree.py`).
+
 ## Preflight: worktree isolation
 
 Any mode that writes to how-to docs (`add`, `update`, `maintain`'s inline fixes) must not run
 directly against the primary checkout. Run this before making any such edit:
 
 ```bash
-bash ~/.claude/skills/how-tos/check_worktree.sh
+python3 scripts/check_worktree.py
 ```
 
 If it exits non-zero, stop — do not edit any file. Create or switch to an isolated worktree first
@@ -55,12 +64,13 @@ covers: [tag1, tag2, tag3]         # keywords for relevance matching
 ## Deferring to `scripts`
 
 Before writing a manual command block into a how-to step, check whether a script already covers
-it: `/scripts context "<step intent>"`. If one exists, the step must say to run it (name the script
-path, or the `/scripts run <script>` invocation) instead of inlining the command — the script's
-`--help` is the authoritative source for arguments, and duplicating them in the how-to creates a
-second source of truth that will drift. If no script exists but the step is a good automation
-candidate, note that in the how-to body (or flag it via `/scripts suggest`) rather than silently
-leaving it manual forever.
+it — use the scripts skill's discovery mechanism (its `context` mode, given the step's intent) to
+find out. If one exists, the step must say to run it (name the script path, or point at the
+scripts skill's `run` mode) instead of inlining the command — the script's `--help` is the
+authoritative source for arguments, and duplicating them in the how-to creates a second source of
+truth that will drift. If no script exists but the step is a good automation candidate, note that
+in the how-to body (or flag it to the scripts skill's `suggest` mode) rather than silently leaving
+it manual forever.
 
 Steps that are genuinely manual (a web console click-path, waiting on an external party, a
 one-time human judgment call) stay written out in full — don't force a script where none belongs.
@@ -70,38 +80,39 @@ one-time human judgment call) stay written out in full — don't force a script 
 Run the discovery script first to understand the project's how-to landscape:
 
 ```bash
-bash ~/.claude/skills/how-tos/discover_docs.sh
+python3 scripts/discover_docs.py
 ```
 
 ## Modes
 
 ### `add <path> "<intent>"`
 
-1. Run `check_worktree.sh` (preflight — stop if it fails)
-2. Run `discover_docs.sh`
+1. Run `check_worktree.py` (preflight — stop if it fails)
+2. Run `discover_docs.py`
 3. Read existing how-tos in the same folder for tone/format reference
-4. For each step, check `/scripts context "<step intent>"` — defer to an existing script per the
-   section above instead of inlining commands
+4. For each step, check whether the scripts skill's discovery mechanism already covers it — defer
+   to an existing script per the section above instead of inlining commands
 5. Create the new how-to doc at `<path>` with correct frontmatter and numbered, imperative steps
    - Content is procedural: concrete, ordered, verifiable steps — not background or rationale
    - Concise — Claude reads this on every relevant operational task
-6. Ensure root `CLAUDE.md` contains the how-tos instruction (see below); add it if missing
+6. Ensure root `AGENTS.md` contains the how-tos instruction (see below); add it if missing
 
 ### `update <path> "<intent>"`
 
-1. Run `check_worktree.sh` (preflight — stop if it fails)
-2. Run `discover_docs.sh`
+1. Run `check_worktree.py` (preflight — stop if it fails)
+2. Run `discover_docs.py`
 3. Read the current doc
 4. Update steps and amend frontmatter as needed (preserve existing fields, update if stale)
-5. Re-check any newly-manual steps against `/scripts context` per the deferring section above
+5. Re-check any newly-manual steps against the scripts skill's discovery mechanism per the
+   deferring section above
 
 ### `maintain`
 
-A quality audit of the entire how-to system. Run `check_worktree.sh` (preflight — stop if it
+A quality audit of the entire how-to system. Run `check_worktree.py` (preflight — stop if it
 fails, since this mode fixes things inline), then:
 
 ```bash
-bash ~/.claude/skills/how-tos/describe_docs.sh
+python3 scripts/describe_docs.py
 ```
 
 Audit each doc by reading it fully:
@@ -119,7 +130,7 @@ Report a summary: what was changed, what was flagged for human review.
 
 Find and return the how-tos relevant to an operational task.
 
-1. Run `describe_docs.sh` — frontmatter only, no body
+1. Run `describe_docs.py` — frontmatter only, no body
 2. Match `covers` tags and `description` text against the task description — be inclusive, not exclusive; err on the side of returning more
 3. Read and return the **full content** of matched docs
 4. If no docs match, say so clearly — do not fabricate a procedure
@@ -131,9 +142,9 @@ compile, cut a video, evaluate an agent, ...) to replace ad hoc rediscovery.
 
 Explore the repository and propose new how-to docs that would be useful to add.
 
-1. Run `discover_docs.sh` to see what how-tos already exist
+1. Run `discover_docs.py` to see what how-tos already exist
 2. Explore the repository for undocumented procedures:
-   - Read `CLAUDE.md`, README files, and CI/deploy configs for multi-step operational tasks
+   - Read `AGENTS.md`, README files, and CI/deploy configs for multi-step operational tasks
    - Look for scripts in `scripts/` that are clearly one step of a larger manual procedure (e.g. a
      `generate-token.sh` next to no doc explaining when/why to run it)
    - Look for task or note history (tasks/, docs/, project notes) describing "how I did X" that
@@ -151,9 +162,13 @@ memory — not on documenting things that are obvious from a single script's `--
 
 ---
 
-## CLAUDE.md instruction
+## AGENTS.md instruction
 
-The root `CLAUDE.md` should contain this block (add it under a `## How-Tos` heading if missing):
+The root `AGENTS.md` should contain this block (add it under a `## How-Tos` heading if missing).
+Use `AGENTS.md`, not `CLAUDE.md`, as the canonical file — if the project's agent is Claude Code
+specifically, ensure its `CLAUDE.md` contains a single-line import instead of a duplicated copy:
+`@AGENTS.md` (Claude Code resolves that as an include). Other agents that support the emerging
+`AGENTS.md` cross-tool convention read it directly, no import needed.
 
 ```
 ## How-Tos

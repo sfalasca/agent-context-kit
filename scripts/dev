@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+# tags: [container, test, dev, docker, podman]
+"""Runtime-detecting wrapper around docker/podman compose for this repo's own dev/test
+container (see Containerfile, compose.yaml). Picks whichever runtime is installed so nobody
+has to hardcode one -- see docs/os-independence.md and the bundled
+container-only-development directive this repo ships to consumers.
+"""
+
+import argparse
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+def detect_compose_command():
+    if shutil.which("docker") and _docker_compose_available():
+        return ["docker", "compose"]
+    if shutil.which("podman-compose"):
+        return ["podman-compose"]
+    if shutil.which("podman") and _podman_compose_plugin_available():
+        return ["podman", "compose"]
+    return None
+
+
+def _docker_compose_available() -> bool:
+    result = subprocess.run(
+        ["docker", "compose", "version"], capture_output=True, text=True
+    )
+    return result.returncode == 0
+
+
+def _podman_compose_plugin_available() -> bool:
+    result = subprocess.run(
+        ["podman", "compose", "version"], capture_output=True, text=True
+    )
+    return result.returncode == 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Run this repo's checks or an interactive dev shell in a container, "
+        "using whichever of docker/podman compose is installed.",
+        epilog="Examples: `scripts/dev test` runs the full test suite (including the "
+        "network-touching npx-skills-add and default-install-target tests that only run "
+        "inside a container). `scripts/dev shell` drops into an interactive dev container "
+        "with the repo bind-mounted read-write.",
+    )
+    parser.add_argument(
+        "command",
+        choices=["test", "shell"],
+        help="'test' runs the checks service (read-only mount, full suite); "
+        "'shell' runs the dev service (read-write mount, interactive bash).",
+    )
+    args = parser.parse_args()
+
+    compose = detect_compose_command()
+    if compose is None:
+        print(
+            "error: no container runtime found. Install Docker (with the compose plugin) or "
+            "Podman (with podman-compose or the compose plugin).",
+            file=sys.stderr,
+        )
+        return 1
+
+    if args.command == "test":
+        cmd = [*compose, "run", "--build", "--rm", "checks"]
+    else:
+        cmd = [*compose, "run", "--build", "--rm", "dev"]
+
+    result = subprocess.run(cmd, cwd=REPO_ROOT)
+    return result.returncode
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

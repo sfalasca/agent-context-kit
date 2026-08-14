@@ -1,12 +1,21 @@
 ---
 name: scripts
-description: Discover, understand, run, and scaffold automation scripts in scripts/ folders. Use when the user wants to find a script for a task, run a script, add a new script, audit existing scripts, or get suggestions for scripts to automate repeated work. Modes: context, run, add, maintain, suggest.
-argument-hint: <context|run|add|maintain|suggest> [path] ["intent or task description"]
-context: fork
-allowed-tools: Read, Edit, Write, Glob, Grep, Bash, Skill
+description: "Discover, understand, run, and scaffold automation scripts in scripts/ folders. Use when the user wants to find a script for a task, run a script, add a new script, audit existing scripts, or get suggestions for scripts to automate repeated work. Modes: context, run, add, maintain, suggest."
+compatibility: Requires Python 3.9+. Slash-command dispatch (/scripts ...) and cross-skill invocation via the Skill tool are Claude Code conventions; other agents can still follow these instructions and run discover_scripts.py/describe_scripts.py directly.
+allowed-tools: Read Edit Write Glob Grep Bash Skill
+metadata:
+  claude-code-argument-hint: <context|run|add|maintain|suggest> [path] ["intent or task description"]
+  claude-code-context: fork
 ---
 
 You manage a project's script library — executable files in `scripts/` and `**/scripts/` folders that automate tasks. Scripts are self-documenting via `--help` — that is the authoritative source of what a script does and how to call it, not a comment header.
+
+This skill's own `discover_scripts.py`/`describe_scripts.py` are plain Python 3 (no bash/WSL
+required — this works the same on Linux, macOS, and Windows) and live in this skill's own
+`scripts/` directory, next to this `SKILL.md` file.
+Run them with `python3 <path>`, resolving `<path>` against that directory (e.g. if this file is
+at `/home/alice/.claude/skills/scripts/SKILL.md`, run
+`python3 /home/alice/.claude/skills/scripts/scripts/discover_scripts.py`).
 
 ## The `--help` requirement
 
@@ -46,7 +55,7 @@ that can drift from what `--help` actually prints.
 Run the discovery script first:
 
 ```bash
-bash ~/.claude/skills/scripts/discover_scripts.sh
+python3 scripts/discover_scripts.py
 ```
 
 ## Modes
@@ -65,13 +74,13 @@ prerequisites, or non-obvious conventions live (permission requirements, environ
 recommended configs) — things no individual script's `--help` output would mention on its own.
 Treat it as authoritative context for every script in that same folder, not just noise to skip.
 
-1. Run `discover_scripts.sh` — list of paths
-2. Run `describe_scripts.sh` — runs `--help` on every script (with a timeout) and prints its
+1. Run `discover_scripts.py` — list of paths
+2. Run `describe_scripts.py` — runs `--help` on every script (with a timeout) and prints its
    output, plus any optional `# tags:` line; for a `README.md` in a scripts folder, prints its
    full content instead of attempting `--help` on it
 
 ```bash
-bash ~/.claude/skills/scripts/describe_scripts.sh
+python3 scripts/describe_scripts.py
 ```
 
 3. Match the `--help` output, any `tags` line, any sibling `README.md` content, and the path
@@ -94,7 +103,7 @@ Execute a script.
 
 Scaffold a new script.
 
-1. Run `discover_scripts.sh` to see existing scripts in the target folder
+1. Run `discover_scripts.py` to see existing scripts in the target folder
 2. Infer the language from existing scripts in the same `scripts/` folder; if the folder is empty or mixed, ask the user; default to **Python** when no signal is present
 3. Create the file at `<path>` with:
    - Shebang line appropriate for the language
@@ -110,9 +119,9 @@ Scaffold a new script.
 
 ### `maintain`
 
-Audit the script library for quality. Run `describe_scripts.sh` first, then for each script:
+Audit the script library for quality. Run `describe_scripts.py` first, then for each script:
 
-- **`--help` works**: this is the load-bearing check. Flag any script `describe_scripts.sh` marked
+- **`--help` works**: this is the load-bearing check. Flag any script `describe_scripts.py` marked
   as failing, hanging (timed out), or producing no output — this is a bug in the script itself
   (see the `--help` requirement above), not a cosmetic issue
 - **Executable bit**: flag if the file is not executable
@@ -126,7 +135,7 @@ papering over it.
 
 Scan the project for automation opportunities and propose new scripts.
 
-1. Run `discover_scripts.sh` to see what already exists
+1. Run `discover_scripts.py` to see what already exists
 2. Scan the project for signals:
    - Long bash one-liners or manual steps described in `docs/` or README files
    - `TODO: automate` or `FIXME` comments in code

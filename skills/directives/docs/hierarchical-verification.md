@@ -13,11 +13,13 @@ covers: [verification, testing, linting, static-analysis, ci, fail-fast, review,
   3. unit tests
   4. static analysis / sanitizers
   5. integration / end-to-end tests
-  6. LLM-based review (most expensive, used last, as a complement not a replacement for 1-5) — the
-     `code-review` skill (six lenses: reusability, directive consistency, testability, test
-     coverage, breaking changes, code quality) is the concrete tool for this step when one is
-     available; it's interactive by design, so unattended runs apply its lenses headlessly instead
-     of invoking it directly (see `idle_work`'s own per-task execution for how)
+  6. LLM-based review (most expensive, used last, as a complement not a replacement for 1-5) — use
+     whatever code-review tooling/skill the environment provides for the normal review pass, plus a
+     separate pass that checks the change for consistency with this project's directives (see the
+     `directives` skill) — a normal code-review pass doesn't know a project's specific conventions,
+     so it won't catch a change that works but violates one. If no review tooling is configured, do
+     both passes directly rather than skipping this step. If review tooling is normally interactive,
+     unattended runs must still apply both passes headlessly rather than skipping this step.
 - This ordering exists to get the fastest possible signal on failure — do not run an expensive step
   before a cheap one that would have caught the same class of problem sooner.
 - "Working" is never declared from code reading or reasoning alone. A change is only reported as

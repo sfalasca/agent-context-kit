@@ -1,12 +1,21 @@
 ---
 name: directives
-description: Manage project directive docs in docs/ folders. Use when the user wants to add or update conventions/standards documents, audit the directive system for quality, or find which directives are relevant to a task. Modes: add, update, maintain, context, suggest.
-argument-hint: <add|update|maintain|context|suggest> [path] ["intent or task description"]
-context: fork
-allowed-tools: Read, Edit, Write, Glob, Grep, Bash, Skill
+description: "Manage project directive docs in docs/ folders. Use when the user wants to add or update conventions/standards documents, audit the directive system for quality, or find which directives are relevant to a task. Modes: add, update, maintain, context, suggest."
+compatibility: Requires Python 3.9+ and git. Slash-command dispatch (/directives ...) and cross-skill invocation via the Skill tool are Claude Code conventions; other agents can still follow these instructions and run the bundled scripts/ directly.
+allowed-tools: Read Edit Write Glob Grep Bash Skill
+metadata:
+  claude-code-argument-hint: <add|update|maintain|context|suggest> [path] ["intent or task description"]
+  claude-code-context: fork
 ---
 
-You manage a project's directive system — structured markdown files in `docs/` and `**/docs/` folders that encode conventions, standards, and domain knowledge. A single root `CLAUDE.md` tells Claude to use this skill to find relevant directives before doing any work.
+You manage a project's directive system — structured markdown files in `docs/` and `**/docs/` folders that encode conventions, standards, and domain knowledge. A single root `AGENTS.md` tells agents to use this skill to find relevant directives before doing any work.
+
+All scripts this skill uses (`scripts/check_worktree.py`, `scripts/discover_docs.py`,
+`scripts/describe_docs.py`) are plain Python 3 (no bash/WSL required — this works the same on
+Linux, macOS, and Windows) and live in this skill's own `scripts/` directory, next to this
+`SKILL.md` file. Run them with `python3 <path>`, resolving `<path>` against that directory (e.g.
+if this file is at `/home/alice/.claude/skills/directives/SKILL.md`, run
+`python3 /home/alice/.claude/skills/directives/scripts/check_worktree.py`).
 
 ## Preflight: worktree isolation
 
@@ -14,7 +23,7 @@ Any mode that writes to directive docs (`add`, `update`, `maintain`'s inline fix
 directly against the primary checkout. Run this before making any such edit:
 
 ```bash
-bash ~/.claude/skills/directives/check_worktree.sh
+python3 scripts/check_worktree.py
 ```
 
 If it exits non-zero, stop — do not edit any file. Create or switch to an isolated worktree first
@@ -28,11 +37,17 @@ directive docs — general engineering conventions (container-only development, 
 artifacts, git worktrees + OneFlow, tools-over-judgment, hierarchical verification, task
 management) that apply to any project, not just one that happens to vendor its own copies.
 
-`discover_docs.sh`/`describe_docs.sh` always include these bundled docs *in addition to* whatever
+`discover_docs.py`/`describe_docs.py` always include these bundled docs *in addition to* whatever
 a project has in its own `docs/` folders — there is nothing to set up per project to benefit from
-them. Treat them as read-only defaults: **`add`/`update` only ever create or modify files in the
-calling project's own `docs/` folder, never in this skill's bundled `docs/`.** If a bundled default
-needs to change, edit it here (in the skill), not by forking a copy into a project.
+them. A project that wants to opt out entirely (it disagrees with the defaults wholesale, or
+wants a clean slate) creates a `.no-bundled-directives` marker file (any content — presence is
+what matters) at its root; `discover_docs.py`/`describe_docs.py` then skip the bundled-docs
+section for that project, regardless of whether this skill is installed via symlink or copy (see
+`docs/install-conventions.md` in the agent-context-kit repo for why both an install-time flag and
+this per-project marker exist). Short of that, treat them as read-only defaults: **`add`/`update`
+only ever create or modify files in the calling project's own `docs/` folder, never in this
+skill's bundled `docs/`.** If a bundled default needs to change, edit it here (in the skill), not
+by forking a copy into a project.
 
 **Precedence**: when a project's own doc and a bundled default cover the same topic (e.g. both
 describe the git integration/merge strategy), the project doc wins — it is the more specific,
@@ -57,37 +72,37 @@ covers: [tag1, tag2, tag3]         # keywords for relevance matching
 Run the discovery script first to understand the project's docs landscape:
 
 ```bash
-bash ~/.claude/skills/directives/discover_docs.sh
+python3 scripts/discover_docs.py
 ```
 
 ## Modes
 
 ### `add <path> "<intent>"`
 
-1. Run `check_worktree.sh` (preflight — stop if it fails)
-2. Run `discover_docs.sh`
+1. Run `check_worktree.py` (preflight — stop if it fails)
+2. Run `discover_docs.py`
 3. Read existing docs in the same folder for tone/format reference
 4. Create the new directive doc at `<path>` with correct frontmatter and well-structured content
    - Content should be directive in tone: rules, not descriptions
    - Concise — Claude reads this on every relevant task
-5. Ensure root `CLAUDE.md` contains the directives instruction (see below); add it if missing
+5. Ensure root `AGENTS.md` contains the directives instruction (see below); add it if missing
 6. Assess impact and apply codebase changes (see Impact Assessment)
 
 ### `update <path> "<intent>"`
 
-1. Run `check_worktree.sh` (preflight — stop if it fails)
-2. Run `discover_docs.sh`
+1. Run `check_worktree.py` (preflight — stop if it fails)
+2. Run `discover_docs.py`
 3. Read the current doc
 4. Update content and amend frontmatter as needed (preserve existing fields, update if stale)
 5. Assess impact and apply codebase changes
 
 ### `maintain`
 
-A quality audit of the entire directive system. Run `check_worktree.sh` (preflight — stop if it
+A quality audit of the entire directive system. Run `check_worktree.py` (preflight — stop if it
 fails, since this mode fixes things inline), then:
 
 ```bash
-bash ~/.claude/skills/directives/describe_docs.sh
+python3 scripts/describe_docs.py
 ```
 
 Audit each doc by reading it fully:
@@ -99,7 +114,7 @@ Audit each doc by reading it fully:
 - **Body relevance**: are there sections that contradict current project state, or are clearly outdated? Do NOT silently delete content — flag for human review with a comment or report.
 - **Bundled-default conflicts**: for each skill-bundled doc, check whether any project doc covers the same topic (matching `covers` tags is a good starting signal) and whether their guidance actually agrees. Flag any contradiction for human review — do not silently pick a winner.
 
-For root `CLAUDE.md`:
+For root `AGENTS.md`:
 - Check the directives instruction is present; add it if missing
 
 Report a summary: what was changed, what was flagged for human review.
@@ -108,7 +123,7 @@ Report a summary: what was changed, what was flagged for human review.
 
 Find and return the directives relevant to a task.
 
-1. Run `describe_docs.sh` — frontmatter only, no body
+1. Run `describe_docs.py` — frontmatter only, no body
 2. Match `covers` tags and `description` text against the task description — be inclusive, not exclusive; err on the side of returning more
 3. Read and return the **full content** of matched docs
 4. If no docs match, say so clearly — do not fabricate conventions
@@ -119,9 +134,9 @@ This mode is intended to be called at the start of any task to replace manual di
 
 Explore the repository and propose new directive docs that would be useful to add.
 
-1. Run `discover_docs.sh` to see what docs already exist
+1. Run `discover_docs.py` to see what docs already exist
 2. Explore the repository structure:
-   - Read `CLAUDE.md` and any existing docs to understand what is already covered
+   - Read `AGENTS.md` and any existing docs to understand what is already covered
    - Scan top-level directories and their contents (`ls`, `Glob`, `Read` key files like `Makefile`, `pyproject.toml`, `package.json`, CI configs, etc.)
    - Look for undocumented conventions: naming patterns, testing approaches, tooling, deployment steps, data formats, language-specific idioms
 3. For each gap found, produce a **proposal** — do not create files yet:
@@ -136,9 +151,13 @@ Focus on gaps where Claude would make wrong decisions without guidance — not o
 
 ---
 
-## CLAUDE.md instruction
+## AGENTS.md instruction
 
-The root `CLAUDE.md` should contain this block (add it under a `## Directives` heading if missing):
+The root `AGENTS.md` should contain this block (add it under a `## Directives` heading if
+missing). Use `AGENTS.md`, not `CLAUDE.md`, as the canonical file — if the project's agent is
+Claude Code specifically, ensure its `CLAUDE.md` contains a single-line import instead of a
+duplicated copy: `@AGENTS.md` (Claude Code resolves that as an include). Other agents that
+support the emerging `AGENTS.md` cross-tool convention read it directly, no import needed.
 
 ```
 ## Directives
@@ -158,7 +177,7 @@ Before touching the codebase, estimate scope:
 
 ### Git conventions
 
-1. Run `describe_docs.sh` and check for docs with `git` in their `covers` tags
+1. Run `describe_docs.py` and check for docs with `git` in their `covers` tags
 2. If found → read that doc and follow its conventions exactly for branch naming and commits
 3. If not found → use these defaults:
    - Branch naming: `add/<description>` for new conventions, `fix/<description>` for corrections

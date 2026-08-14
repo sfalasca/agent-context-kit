@@ -1,0 +1,26 @@
+services:
+  checks:
+    build:
+      context: .
+      dockerfile: Containerfile
+      target: checks
+    # Read-only mount: a checks run can never mutate source, per docs' own bundled
+    # container-only-development directive (skills/directives/docs/container-only-development.md).
+    volumes:
+      - .:/workspace:ro
+    working_dir: /workspace
+    # Network access is required for tests/test_npx_skills_install.py to fetch the `skills`
+    # npm package; everything else in the suite is fully offline.
+    environment:
+      AGENT_CONTEXT_KIT_IN_CONTAINER: "1"
+
+  dev:
+    build:
+      context: .
+      dockerfile: Containerfile
+      target: dev
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
