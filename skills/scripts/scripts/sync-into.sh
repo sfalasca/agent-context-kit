@@ -16,8 +16,8 @@ SKILLS_DIR="$(cd "$SCRIPT_DIR/../.." 2>/dev/null && pwd || true)"
 
 print_help() {
   cat <<'EOF'
-sync-into.sh - seed a project's CLAUDE.md and .gitignore with the standard
-directives/how-tos instruction blocks. Idempotent (safe to re-run).
+sync-into.sh - seed a project's CLAUDE.md with the standard directives/how-tos
+instruction blocks. Idempotent (safe to re-run).
 
 Usage:
   sync-into.sh <target-project-path> [--check]
