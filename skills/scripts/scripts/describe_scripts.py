@@ -70,7 +70,8 @@ def read_readme_summary(path: Path) -> list:
 
 
 def describe_one(f: Path) -> None:
-    print(f)
+    # Forward slashes on every OS, so output (and anything keying off it) is OS-invariant.
+    print(f.as_posix())
 
     if f.name == "README.md":
         summary = read_readme_summary(f)
@@ -85,7 +86,9 @@ def describe_one(f: Path) -> None:
         print()
         return
 
-    if not os.access(f, os.X_OK):
+    # The executable bit is a POSIX concept; on Windows os.access(..., X_OK) is
+    # true for any readable file, so the gate only means something on POSIX.
+    if os.name == "posix" and not os.access(f, os.X_OK):
         print("  (not executable -- skipping --help)")
         print()
         return
@@ -94,9 +97,17 @@ def describe_one(f: Path) -> None:
     if tags:
         print(f"  {tags}")
 
+    # Python scripts run through the current interpreter -- shebang lines and the
+    # executable bit don't exist on Windows (see docs/os-independence.md). Anything
+    # else is invoked directly, as before.
+    if f.suffix.lower() == ".py":
+        cmd = [sys.executable, str(f), "--help"]
+    else:
+        cmd = [str(f), "--help"]
+
     try:
         result = subprocess.run(
-            [str(f), "--help"], capture_output=True, text=True, timeout=HELP_TIMEOUT
+            cmd, capture_output=True, text=True, timeout=HELP_TIMEOUT
         )
         status = result.returncode
         output = (result.stdout or "") + (result.stderr or "")

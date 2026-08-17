@@ -42,7 +42,8 @@ def extract_frontmatter(path: Path) -> str:
 
 
 def print_frontmatter(path: Path) -> None:
-    print(path)
+    # Forward slashes on every OS, so output is OS-invariant.
+    print(path.as_posix())
     frontmatter = extract_frontmatter(path)
     if frontmatter:
         for line in frontmatter.splitlines():

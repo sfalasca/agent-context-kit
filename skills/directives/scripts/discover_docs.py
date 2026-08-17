@@ -32,7 +32,8 @@ def print_list(items):
     items = list(items)
     if items:
         for item in items:
-            print(item)
+            # Forward slashes on every OS, so output is OS-invariant.
+            print(item.as_posix())
     else:
         print("(none found)")
 

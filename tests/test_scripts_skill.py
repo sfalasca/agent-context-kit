@@ -1,3 +1,4 @@
+import os
 import stat
 import tempfile
 import unittest
@@ -73,6 +74,7 @@ class DescribeScriptsTest(TmpProjectTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("produced no output", result.stdout)
 
+    @unittest.skipUnless(os.name == "posix", "the executable bit is a POSIX concept")
     def test_skips_non_executable(self):
         (self.scripts_dir / "not_executable.py").write_text(GOOD_SCRIPT)
         result = run(["python3", DESCRIBE], cwd=self.project)
