@@ -1,5 +1,7 @@
 # agent-context-kit
 
+[![CI](https://github.com/sfalasca/agent-context-kit/workflows/CI/badge.svg)](https://github.com/sfalasca/agent-context-kit/actions/workflows/ci.yml)
+
 [Project page](https://falasca.engineering/agent-context-kit/)
 
 Three [Agent Skills](https://agentskills.io/specification) that give a coding agent persistent,
