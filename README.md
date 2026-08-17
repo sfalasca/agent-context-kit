@@ -44,7 +44,7 @@ Linux, macOS, and Windows.
 ### Primary: any agent, via `npx skills`
 
 ```bash
-npx skills add <this-repo-url-or-owner/repo>
+npx skills add sfalasca/agent-context-kit
 ```
 
 [`npx skills`](https://github.com/vercel-labs/skills) is the open-ecosystem installer for the
