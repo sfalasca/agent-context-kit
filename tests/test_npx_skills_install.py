@@ -11,7 +11,7 @@ from pathlib import Path
 
 from util import REPO_ROOT, run
 
-SKILL_NAMES = {"directives", "how-tos", "scripts"}
+SKILL_NAMES = {"directives", "how-tos", "scripts", "context-refactor"}
 
 
 @unittest.skipUnless(
@@ -20,7 +20,7 @@ SKILL_NAMES = {"directives", "how-tos", "scripts"}
     "repo's test harness runs in. Run via `python3 scripts/dev test`.",
 )
 class NpxSkillsAddTest(unittest.TestCase):
-    def test_lists_all_three_skills(self):
+    def test_lists_all_skills(self):
         result = run(["npx", "--yes", "skills@latest", "add", REPO_ROOT, "--list"], timeout=120)
         self.assertEqual(result.returncode, 0, result.stderr)
         for name in SKILL_NAMES:

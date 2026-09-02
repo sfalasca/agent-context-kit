@@ -26,7 +26,7 @@ have needed to grow:
 
 A second route exists for Claude Code specifically: this repo self-hosts a Claude Code plugin
 marketplace (`.claude-plugin/marketplace.json`, `.claude-plugin/plugin.json`). Installing via
-`/plugin install agent-context-kit@agent-context-kit` namespaces all three skills under the
+`/plugin install agent-context-kit@agent-context-kit` namespaces all four skills under the
 plugin name (`/agent-context-kit:directives`, etc.) instead of the bare names `npx skills add`
 installs under — see [`how-tos/install-skills.md`](../how-tos/install-skills.md). There is no
 repo-maintained installer script; both routes are third-party (`npx skills`) or Claude

@@ -4,7 +4,7 @@
 
 [Project page](https://falasca.engineering/agent-context-kit/)
 
-Three [Agent Skills](https://agentskills.io/specification) that give a coding agent persistent,
+Four [Agent Skills](https://agentskills.io/specification) that give a coding agent persistent,
 discoverable context about a codebase, instead of re-deriving it every session. `SKILL.md` is an
 open format — these work with any agent that supports it (Claude Code, Codex, Cursor, OpenCode,
 and many more; see [the `npx skills` supported-agents list](https://github.com/vercel-labs/skills#supported-agents)),
@@ -19,22 +19,30 @@ not just one vendor's product:
 - **`scripts`** — discovery for a project's `scripts/` folders, using each script's own `--help`
   output as the source of truth (not a comment header that can drift). Lets an agent find and run
   existing automation instead of reinventing it inline.
+- **`context-refactor`** — a cross-cutting audit across all three systems above, for the judgment
+  calls none of them can make alone: a section embedded in the wrong kind of doc, a directive with
+  no backing enforcement script, a doc or script at the wrong level of the directory tree, or
+  near-duplicate scripts worth generalizing into one. Invoked directly when planning a refactor,
+  not proactively gated like the other three — see its `SKILL.md` for the interactive,
+  one-change-at-a-time flow.
 
-The three compose: a `how-to` step that's automatable should point at a `script` instead of
+The first three compose: a `how-to` step that's automatable should point at a `script` instead of
 inlining a command; a `directive` about git conventions governs how both `add` and `maintain`
-modes commit their own changes. Each skill also ships small discovery/description scripts
+modes commit their own changes. Each ships small discovery/description scripts
 (`discover_*.py`, `describe_*.py`) that do cheap metadata extraction — frontmatter for docs,
 `--help` output for scripts — so the agent doesn't have to read every file's full body just to
-figure out what's relevant to the current task.
+figure out what's relevant to the current task. `context-refactor` sits on top, calling those same
+discovery scripts by relative path rather than duplicating them.
 
 ## Why this exists
 
 Most of what makes an AI coding agent effective on a real, non-trivial codebase isn't the model —
 it's whether the codebase is *legible* to the agent: are conventions written down somewhere the
 agent will actually look, are operational procedures documented instead of tribal knowledge, is
-existing automation discoverable instead of getting silently reimplemented every session. These
-three skills are the minimum mechanism to make that true, ported out of a personal
-multi-project workspace where they get exercised daily.
+existing automation discoverable instead of getting silently reimplemented every session, and
+whether that whole system stays coherent as the codebase grows (right doc in the right place,
+duplication caught before it drifts). These four skills are the minimum mechanism to make that
+true, ported out of a personal multi-project workspace where they get exercised daily.
 
 ## Requirements
 
@@ -67,20 +75,22 @@ to any community-marketplace listing:
 /plugin install agent-context-kit@agent-context-kit
 ```
 
-**Namespacing caveat**: a plugin install bundles all three skills under this repo's plugin name.
+**Namespacing caveat**: a plugin install bundles all four skills under this repo's plugin name.
 Skills installed this way are invoked as `/agent-context-kit:directives`,
-`/agent-context-kit:how-tos`, and `/agent-context-kit:scripts` — not the bare `/directives`,
-`/how-tos`, `/scripts` names used by the `npx skills add` and manual-clone routes above. Pick one
-install route per agent setup; don't mix bare and namespaced expectations.
+`/agent-context-kit:how-tos`, `/agent-context-kit:scripts`, and `/agent-context-kit:context-refactor`
+— not the bare `/directives`, `/how-tos`, `/scripts`, `/context-refactor` names used by the
+`npx skills add` and manual-clone routes above. Pick one install route per agent setup; don't mix
+bare and namespaced expectations.
 
 ## Use in a project
 
-Each skill's `SKILL.md` documents an `AGENTS.md` instruction block under a "## AGENTS.md
-instruction" heading — copy it into the project's `AGENTS.md` (create the file if it doesn't
-exist yet) so the agent proactively calls `context` mode before relevant work, instead of only
-using the skill when explicitly asked. `AGENTS.md` is the canonical file, not `CLAUDE.md`; if the
-project's agent is Claude Code, give its `CLAUDE.md` a single `@AGENTS.md` import line instead of
-duplicating the block.
+`directives`, `how-tos`, and `scripts` each document an `AGENTS.md` instruction block under a "##
+AGENTS.md instruction" heading — copy it into the project's `AGENTS.md` (create the file if it
+doesn't exist yet) so the agent proactively calls `context` mode before relevant work, instead of
+only using the skill when explicitly asked. `AGENTS.md` is the canonical file, not `CLAUDE.md`; if
+the project's agent is Claude Code, give its `CLAUDE.md` a single `@AGENTS.md` import line instead
+of duplicating the block. `context-refactor` has no such block — it's an audit you invoke directly
+when planning a refactor, not something that should fire on every task.
 
 From there, each skill is invoked by name inside an agent session — for example, as a slash
 command in Claude Code (bare name if installed via `npx skills add`/manual clone, namespaced
@@ -90,6 +100,7 @@ command in Claude Code (bare name if installed via `npx skills add`/manual clone
 /directives context "add a new API endpoint"
 /how-tos context "cut a release"
 /scripts context "generate a report"
+/context-refactor
 ```
 
 or in `add`/`update`/`maintain`/`suggest` modes to create or audit docs and scripts — see each
@@ -114,7 +125,8 @@ This repo's own conventions (OS independence, Agent Skills spec compliance, inst
 in [`docs/`](docs/) — read them before changing anything under `skills/`. Operational procedures
 for working on this repo itself (running the test suite, installing these skills for local
 testing) live in [`how-tos/`](how-tos/) — this repo dogfoods its own `directives`/`how-tos`/
-`scripts` skills on itself; its `AGENTS.md` carries all three skills' instruction blocks, and its
+`scripts` skills on itself; its `AGENTS.md` carries all three skills' instruction blocks (not
+`context-refactor`'s, per the note above), and its
 `CLAUDE.md` just imports it (`@AGENTS.md`). Tests for every script
 in this repo live in [`tests/`](tests/); the shipped skills themselves need only Python 3.9+ and
 Git, but running the test suite also needs `pyyaml` (frontmatter validation) on the host, or

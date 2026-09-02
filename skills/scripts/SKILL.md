@@ -38,6 +38,11 @@ A script whose `--help` errors, hangs, or prints nothing is a bug in that script
 
 ## Optional tags header
 
+Deciding whether a script belongs at its current level of the directory tree, or whether it's a
+near-duplicate of a sibling subproject's script worth generalizing and hoisting, is a cross-cutting
+judgment call spanning the directory hierarchy — see `context-refactor` rather than trying to fix
+it from inside `maintain` here.
+
 A script may optionally carry a single header line for cheap keyword pre-filtering, without having
 to execute anything:
 
