@@ -1,5 +1,5 @@
 ---
-description: Install this repo's skills (directives, how-tos, scripts) into an agent, at user or project scope
+description: Install this repo's skills (directives, how-tos, scripts, context-refactor) into an agent, at user or project scope
 scope: root
 covers: [install, npx, skills, claude-code, plugin, marketplace, user-level, project-level, setup]
 ---
@@ -38,20 +38,21 @@ This repo also self-hosts a Claude Code plugin marketplace at
 ```
 
 Skills installed this way are namespaced under the plugin name — invoked as
-`/agent-context-kit:directives`, `/agent-context-kit:how-tos`, `/agent-context-kit:scripts`, not
-the bare `/directives`/`/how-tos`/`/scripts` names the step 1 route uses. Pick one install route
-per agent setup.
+`/agent-context-kit:directives`, `/agent-context-kit:how-tos`, `/agent-context-kit:scripts`,
+`/agent-context-kit:context-refactor`, not the bare `/directives`/`/how-tos`/`/scripts`/
+`/context-refactor` names the step 1 route uses. Pick one install route per agent setup.
 
 ## 3. After installing: wire the `AGENTS.md` reminder blocks
 
 Installing the skills makes them available; it doesn't make an agent proactively call `context`
-mode before relevant work. Each of `directives`/`how-tos` documents an instruction block under a
-"## AGENTS.md instruction" heading in its own `SKILL.md` — copy that block into the project's
-`AGENTS.md` (create the file if it doesn't exist yet). `AGENTS.md` is the canonical file, not
-`CLAUDE.md`. If Claude Code is one of the agents in play, also give the project's `CLAUDE.md` a
-single `@AGENTS.md` import line (Claude Code resolves that as an include) rather than duplicating
-the block — other agents that support the emerging `AGENTS.md` cross-tool convention read it
-directly, no import needed.
+mode before relevant work. Each of `directives`/`how-tos`/`scripts` documents an instruction block
+under a "## AGENTS.md instruction" heading in its own `SKILL.md` — copy that block into the
+project's `AGENTS.md` (create the file if it doesn't exist yet). `AGENTS.md` is the canonical
+file, not `CLAUDE.md`. If Claude Code is one of the agents in play, also give the project's
+`CLAUDE.md` a single `@AGENTS.md` import line (Claude Code resolves that as an include) rather
+than duplicating the block — other agents that support the emerging `AGENTS.md` cross-tool
+convention read it directly, no import needed. `context-refactor` has no such block — it's invoked
+directly when planning a refactor, not gated before every task.
 
 ## 4. Verify the install
 

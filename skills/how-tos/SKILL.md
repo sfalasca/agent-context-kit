@@ -29,6 +29,10 @@ frontmatter-only describe pass) applied to `how-tos/` instead of `docs/`. Unlike
 ships **no bundled defaults** — operational procedures are inherently project-specific, so there is
 nothing generic to fall back to.
 
+A section embedded in the wrong kind of doc (a directive with steps that belong here, or a how-to
+step that states a standing rule) is a cross-cutting concern spanning both skills — see
+`context-refactor` rather than trying to fix it from inside `maintain` here.
+
 All scripts this skill uses (`scripts/discover_docs.py`, `scripts/describe_docs.py`) are plain
 Python 3 (no bash/WSL required — this works the same on Linux, macOS, and Windows) and live in
 this skill's own `scripts/` directory, next to this `SKILL.md` file. Run them with

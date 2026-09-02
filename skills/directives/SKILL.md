@@ -42,6 +42,11 @@ deliberately-authored source. Don't silently follow the bundled default if a pro
 it; flag the contradiction (see `maintain` below) so one of them gets fixed or the project doc
 explicitly notes it supersedes the default.
 
+A directive with an embedded section of ordered steps (that section belongs in a how-to instead),
+a directive with no backing enforcement script, or a directive at the wrong level of the directory
+tree are cross-cutting judgment calls spanning `how-tos`/`scripts`/the directory hierarchy — see
+`context-refactor` rather than trying to fix them from inside `maintain` here.
+
 ## Directive doc frontmatter
 
 Every directive doc must have YAML frontmatter with exactly these fields:

@@ -1,6 +1,6 @@
 {
   "name": "agent-context-kit",
-  "description": "Self-hosted marketplace for the agent-context-kit plugin (directives, how-tos, scripts Agent Skills).",
+  "description": "Self-hosted marketplace for the agent-context-kit plugin (directives, how-tos, scripts, context-refactor Agent Skills).",
   "owner": {
     "name": "Stefano Falasca",
     "email": "stefano.falasca@gmail.com"
@@ -9,7 +9,7 @@
     {
       "name": "agent-context-kit",
       "source": "./",
-      "description": "Three Agent Skills (directives, how-tos, scripts) that give a coding agent persistent, discoverable context about a codebase, instead of re-deriving it every session.",
+      "description": "Four Agent Skills (directives, how-tos, scripts, context-refactor) that give a coding agent persistent, discoverable context about a codebase, instead of re-deriving it every session.",
       "version": "1.0.0",
       "license": "MIT"
     }
